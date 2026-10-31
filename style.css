@@ -1,0 +1,15 @@
+*{
+    box-sizing: border-box;
+}
+
+
+.field{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+.global_error{
+    color: red;
+}

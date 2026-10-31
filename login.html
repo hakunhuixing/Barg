@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>登录</title>
+  <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+
+<main> 
+
+<h1 class="field">登录BARG</h1> 
+<p class = "field">请登录，虽然没什么实际作用</p>
+
+<!--标题这一块-->
+<form id="login-form" novalidate>
+<!--名字-->
+<div class="field">
+    <label for="username">你的名字</label>
+    <input id="username" name="username" type="text" placeholder="随便编个名字吧" autocomplete="username" required>
+    <p class="error"></p>
+</div>
+<!--密码-->
+<div class="field">
+    <label for="password">密码</label>
+    <input id="password" name="password" type="password" autocomplete="current-password" required>
+    <p class="error"></p>
+</div>
+<!--按钮-->
+<div class="field">
+    <button type="button" onclick="location.href='index.html'">取消</button>
+    <button type="submit" id="submit-btn">确定</button>
+</div>
+ <p class="global_error" id="global-error"></p>
+</form>
+
+</main>
+<!--JS这一块-->
+<script src="common.js"></script>
+<script>
+    (function () {
+      var form = document.getElementById('login-form');
+      var submitBtn = document.getElementById('submit-btn');
+      var globalError = document.getElementById('global-error');
+
+
+      function getRedirect() {
+        var params = new URLSearchParams(location.search);
+        var target = params.get('redirect');
+
+        if (target && target.endsWith('.html') && target.indexOf('login.html') === -1) {
+          return target;
+        }
+        return 'index.html';
+      }
+
+      function setFieldError(name, message) {
+        var input = form.querySelector('[name="' + name + '"]');
+        if (input) {
+          input.parentElement.querySelector('.error').textContent = message;
+          input.classList.add('invalid');
+        }
+      }
+
+      function clearFieldErrors() {
+        var inputs = form.querySelectorAll('input');
+        inputs.forEach(function (input) {
+          input.classList.remove('invalid');
+        });
+        var errors = form.querySelectorAll('.error');
+        errors.forEach(function (el) {
+          el.textContent = '';
+        });
+        globalError.textContent = '';
+      }
+
+      form.addEventListener('submit', async function (event) {
+        event.preventDefault();
+        clearFieldErrors();
+
+        var username = document.getElementById('username').value.trim();
+        var password = document.getElementById('password').value.trim();
+
+
+        var hasError = false;
+        if (!username) {
+          setFieldError('username', '为何不填');
+          hasError = true;
+        }
+        if (!password) {
+          setFieldError('password', '为何不填');
+          hasError = true;
+        }
+        if (hasError) return;
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = '做好并放宽，舒舒服服地上个厕所吧。';
+
+        try {
+
+          var data = await request('/api/v1/auth/login', {
+            method: 'POST',
+            body: { username: username, password: password },
+            auth: false 
+          });
+
+          setToken(data.token);
+          localStorage.setItem('m2_user_info', JSON.stringify(data.user));
+
+
+          location.href = getRedirect();
+        } catch (err) {
+          if (err.code === 1001 && err.data) {
+            showFieldErrors(err.data.errors || err.data, form);
+            globalError.textContent = '你是不是填错了';
+          } else {
+            globalError.textContent = messageOf(err.code, err.message);
+          }
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = '登 录';
+        }
+      });
+    })();
+  </script>
+
+  
+</body>
+</html>
