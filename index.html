@@ -4,12 +4,94 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>~一中音游之光~☆☆</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>The Biggest Association of Rythem Games in NO.1 High School</h1>
-  <p>当前开发进度：登录做好了</p>
-  <button onclick="location.href='login.html'">测试登录</button>
+  <header class="navbar">
+    <h3>BARG</h3>
+    <nav id="nav-guest">
+      <a href="login.html" style="font-size: 16px;" class="fake-btn">点我登录</a>
+    </nav>
+    <nav id="nav-user">
+      <t id="welcome">你好</t>
+      <button class="btn" type="button" id="logout-btn">退出登录</button>
+    </nav>
+  </header>
+
+  <main class="main">
+  <h2 class="blue">We Are The Biggest Association of Rythem Games in NO.1 High School</h2>
+    <div class="content">
+      <h1>~我们玩什么的都有~</h1>
+      <img src="rGs.png" alt="Image" width="400" height="500">
+    </div>
+    <div class="content">
+      <img src="LiHan_Handsom.png" alt="Handsome" width="300" height="450">
+      <h1>~最帅吉祥物~</h1>
+    </div>
+    <div class="content">
+      <h1>~赶快加入BARG~</h1>
+      <img src="LiHan_Like.png" alt="Like" width="300" height="450">
+    </div>
+    <div class="content">
+      <img src="LiHan_Grand.png" alt="Grand" width="300" height="450">
+      <h1>~我们都很强~</h1>
+    </div>
+    <div class="content">
+      <a href="intro.html" style="font-size: 32px;" class="fake-btn">看看我们是谁</a>
+      <img src="LiHan_Like.png" alt="Like" width="300" height="450">
+    </div>
+
+  </main>
 </body>
-                             
+                    
+  <script src="common.js"></script>
+  <script>
+
+    (function(){
+
+      var navGuest = document.getElementById('nav-guest');
+      var navUser = document.getElementById('nav-user');
+      var welcome = document.getElementById('welcome');
+      var logoutBtn = document.getElementById('logout-btn');
+
+      function renderLogOut(){
+        navGuest.style.display = '';
+        navUser.style.display = 'none';
+      }
+
+      function renderLogIn(){
+        navGuest.style.display = 'none';
+        navUser.style.display = '';
+        welcome.textContent = '你已登录（虽然没啥用）';
+      }
+
+      var token = getToken();
+
+      if(!token){
+        renderLogOut();
+      }
+      else{
+        renderLogIn();
+      }
+
+      
+
+      logoutBtn.addEventListener('click', async function() {
+        logoutBtn.disabled = true;
+        logoutBtn.textContent = '退出中';
+        try{
+          await request('/api/v1/auth/logout', {method: 'POST'});
+        }catch(err){
+
+        }finally{
+          clearToken();
+          logoutBtn.disabled  = false;
+          renderLogOut();
+        }
+      })
+
+    })()
+
+  </script>
 
 </html>

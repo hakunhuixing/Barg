@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>注册BARG</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<main>
+  <h1 class="field">注册 BARG</h1>
+  <p class="field">加入BARG</p>
+
+  <form id="register-form" novalidate>
+    <div class="field">
+      <label for="username">用户名</label>
+      <input id="username" name="username" type="text" placeholder="4~32位字母、数字或下划线" autocomplete="username">
+      <p class="error"></p>
+    </div>
+
+    <div class="field">
+      <label for="password">密码</label>
+      <input id="password" name="password" type="password" placeholder="8~64位，至少包含字母和数字" autocomplete="new-password">
+      <p class="error"></p>
+    </div>
+
+    <div class="field">
+      <label for="confirm-password">确认密码</label>
+      <input id="confirm-password" type="password" placeholder="请再次输入密码" autocomplete="new-password">
+      <p class="error"></p>
+    </div>
+
+    <div class="field">
+      <label for="nickname">昵称</label>
+      <input id="nickname" name="nickname" type="text" placeholder="1~32个字符" autocomplete="nickname">
+      <p class="error"></p>
+    </div>
+
+    <div class="field">
+      <button type="button" onclick="location.href='login.html'">返回登录</button>
+      <button type="submit" id="submit-btn">注 册</button>
+    </div>
+
+    <p class="global_error" id="global-error"></p>
+  </form>
+</main>
+
+<script src="common.js"></script>
+<script>
+  (function () {
+    var form = document.getElementById('register-form');
+    var submitBtn = document.getElementById('submit-btn');
+    var globalError = document.getElementById('global-error');
+
+    function setFieldError(inputId, message) {
+      var input = document.getElementById(inputId);
+      if (input) {
+        input.parentElement.querySelector('.error').textContent = message;
+        input.classList.add('invalid');
+      }
+    }
+
+    function clearFieldErrors() {
+      var inputs = form.querySelectorAll('input');
+      inputs.forEach(function (input) {
+        input.classList.remove('invalid');
+      });
+      var errors = form.querySelectorAll('.error');
+      errors.forEach(function (el) {
+        el.textContent = '';
+      });
+      globalError.textContent = '';
+    }
+
+    form.addEventListener('submit', async function (event) {
+      event.preventDefault();
+      clearFieldErrors();
+
+      var username = document.getElementById('username').value.trim();
+      var password = document.getElementById('password').value; 
+      var confirmPassword = document.getElementById('confirm-password').value;
+      var nickname = document.getElementById('nickname').value.trim();
+
+      var hasError = false;
+
+      if (!/^[A-Za-z0-9_]{4,32}$/.test(username)) {
+        setFieldError('username', '用户名为4~32位字母、数字或下划线');
+        hasError = true;
+      }
+
+      if (password.length < 8 || password.length > 64) {
+        setFieldError('password', '密码长度需为8~64位');
+        hasError = true;
+      } else if (!/[A-Za-z]/.test(password) || !/[0-9]/.test(password)) {
+        setFieldError('password', '密码需同时包含字母和数字');
+        hasError = true;
+      }
+
+      if (confirmPassword !== password) {
+        setFieldError('confirm-password', '两次输入的密码不一致');
+        hasError = true;
+      }
+
+      if (nickname.length < 1 || nickname.length > 32) {
+        setFieldError('nickname', '昵称长度需为1~32个字符');
+        hasError = true;
+      }
+
+      if (hasError) return;
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = '注册中...';
+
+      try {
+        var data = await request('/api/v1/auth/register', {
+          method: 'POST',
+          body: {
+            username: username,
+            password: password,
+            nickname: nickname
+          },
+          auth: false 
+        });
+
+        setToken(data.token);
+        localStorage.setItem('m2_user_info', JSON.stringify(data.user));
+        
+        location.href = 'index.html';
+
+      } catch (err) {
+        if (err.code === 1001 && err.data) {
+          showFieldErrors(err.data.errors || err.data, form);
+          globalError.textContent = '请检查表单填写';
+        } else if (err.code === 2001) {
+          setFieldError('username', '用户名已存在');
+        } else {
+          globalError.textContent = messageOf(err.code, err.message);
+        }
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = '注 册';
+      }
+    });
+  })();
+</script>
+
+</body>
+</html>

@@ -35,6 +35,10 @@
 </div>
  <p class="global_error" id="global-error"></p>
 </form>
+<div class="content">
+  <h1>没有账号就  <a href="register.html" style="font-size: 32px;">注册</a>吧</h1>
+  <img src="LiHan_Like.png" alt="Likel">
+</div>
 
 </main>
 <!--JS这一块-->
@@ -81,7 +85,7 @@
         clearFieldErrors();
 
         var username = document.getElementById('username').value.trim();
-        var password = document.getElementById('password').value.trim();
+        var password = document.getElementById('password').value;
 
 
         var hasError = false;
@@ -96,7 +100,7 @@
         if (hasError) return;
 
         submitBtn.disabled = true;
-        submitBtn.textContent = '做好并放宽，舒舒服服地上个厕所吧。';
+        submitBtn.textContent = '加载中，做好并放宽，舒舒服服地上个厕所吧。';
 
         try {
 
