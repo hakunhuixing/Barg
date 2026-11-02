@@ -1,5 +1,5 @@
 
-const API_BASE = 'https://kentucky-saved-announcement-strand.trycloudflare.com/api/v1';
+const API_BASE = 'https://kentucky-saved-announcement-strand.trycloudflare.com';
 const TOKEN_KEY = 'm2_user_token';
 
 
